@@ -7,14 +7,17 @@ export default class DataStorage {
   }
 
   async createTable (connection) {
-    const sql = `
+    const sqls = [`
       CREATE TABLE migrations (
         id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
         name varchar (255),
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `;
-    await connection.query(sql);
+      )`,
+      'CREATE INDEX ind_migration_name ON migrations(name)'
+    ];
+    for (const sql of sqls) {
+      await connection.query(sql);
+    }
   }
 
   async mayBeCreateTable (connection) {

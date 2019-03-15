@@ -6,19 +6,9 @@
       "config": {
         "host": "127.0.0.1",
         "port": "3306",
-        "user": "user",
-        "password": "pass",
-        "database": "database"
-      }
-    },
-    {
-      "name": "SLAVE-1",
-      "config": {
-        "host": "127.0.0.1",
-        "port": "3307",
-        "user": "user",
-        "password": "pass",
-        "database": "database"
+        "user": "konstantin",
+        "password": "1",
+        "database": "srvs"
       }
     }
   ]

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "migrate": "babel-node src/bin/migrate"
+    "migrate": "babel-node src/bin/migrate.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "chalk": "^2.4.2",
-    "commander": "^2.19.0"
+    "commander": "^2.19.0",
+    "debug": "^4.1.1"
   }
 }

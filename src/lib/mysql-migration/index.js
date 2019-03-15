@@ -7,9 +7,12 @@ export default class Migrator {
   constructor (connection) {
     this.connection = connection;
     this.fileStorage = new FileStorage();
-    this.fileStorage.mayBeCreateDirectory();
     this.dataStorage = new DataStorage();
-    this.dataStorage.mayBeCreateTable(connection);
+  }
+
+  async prepare () {
+    this.fileStorage.mayBeCreateDirectory();
+    await this.dataStorage.mayBeCreateTable(this.connection);
   }
 
   async getUpFilenames () {
@@ -26,11 +29,13 @@ export default class Migrator {
     return recordnames;
   }
 
-  create (name) {
+  async create (name) {
+    await this.prepare();
     return this.fileStorage.createMigrationFile(name);
   }
 
   async up (count) {
+    await this.prepare();
     const filenames = await this.getUpFilenames();
     count = Number(count);
     count = isNaN(count) ? filenames.length : count;
@@ -38,6 +43,7 @@ export default class Migrator {
   }
 
   async down (count) {
+    await this.prepare();
     const filenames = await this.getDownFilenames();
     count = Number(count);
     count = isNaN(count) ? 1 : count;
