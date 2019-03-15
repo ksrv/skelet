@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "migrate": "babel-node src/bin/migrate"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +16,9 @@
     "@babel/preset-env": "^7.3.4",
     "@babel/register": "^7.0.0",
     "mysql": "^2.16.0"
+  },
+  "devDependencies": {
+    "chalk": "^2.4.2",
+    "commander": "^2.19.0"
   }
 }

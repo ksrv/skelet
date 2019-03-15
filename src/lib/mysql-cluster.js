@@ -50,8 +50,8 @@ export default class MySqlCluster {
       return connection;
     } catch ({ code, errno, sqlMessage, sqlState, fatal }) {
       const error = { code, errno, sqlMessage, sqlState, fatal };
-      this.log('MYSQL CONNECTION ERROR', error);
-      throw code;
+      this.log('MYSQL CONNECTION ERROR', code);
+      throw error;
     }
   }
 

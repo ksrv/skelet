@@ -1,74 +1,58 @@
+import cluster from '../../bin/mysql';
 import DataStorage from './data-storage';
 import FileStorage from './file-storage';
 
 
 export default class Migrator {
-  constructor ({ fileStorage, dataStorage }) {
-    this.fileStorage = fileStorage;
-    this.dataStorage = dataStorage;
+  constructor (connection) {
+    this.connection = connection;
+    this.fileStorage = new FileStorage();
+    this.fileStorage.mayBeCreateDirectory();
+    this.dataStorage = new DataStorage();
+    this.dataStorage.mayBeCreateTable(connection);
   }
 
   async getUpFilenames () {
-    // массив имен миграций в файлах
     const filenames = this.fileStorage.findAll();
-    // массив имен миграций в БД
-    const recordnames = await this.dataStorage.findAll();
-    // разность массивов
+    const recordnames = await this.dataStorage.findAll(this.connection);
     const diff = filenames.filter(filename => !recordnames.includes(filename));
-    // возвращаем отсортированный массив
-    return diff.sort();
+    diff.sort();
+    return diff;
   }
 
   async getDownFilenames () {
-    // массив имен миграций в файлах
-    const filenames = this.fileStorage.findAll();
-    // массив имен миграций в БД
-    const recordnames = await this.dataStorage.findAll();
-    // разность массивов
-    const diff = filenames.filter(filename => recordnames.includes(filename));
-    // возвращаем отсортированный массив
-    return diff.sort();
+    const recordnames = await this.dataStorage.findAll(this.connection);
+    recordnames.sort().reverse();
+    return recordnames;
   }
 
-  async _process (count, filenames, action, dbaction) {
-    for (const filename of filenames) {
-      const file = this.fileStorage.loadFile(filename);
-      const func = this.dataStorage.cluster.getConnection;
-      const connection = await file[action](func);
-      if (typeof connection.query !== 'function') {
-        throw new Error('Migration must return connection');
-      }
-      await this.dataStorage[dbaction](connection, filename);
-      if (--count == 0) break;
-    }
+  create (name) {
+    return this.fileStorage.createMigrationFile(name);
   }
 
   async up (count) {
     const filenames = await this.getUpFilenames();
-    console.log({ filenames });
     count = Number(count);
     count = isNaN(count) ? filenames.length : count;
-    await this._process(count, filenames, 'up', 'add');
+    return await this._process(count, filenames, 'up', 'add');
   }
 
   async down (count) {
     const filenames = await this.getDownFilenames();
     count = Number(count);
     count = isNaN(count) ? 1 : count;
-    await this._process(count, filenames, 'down', 'remove');
+    return await this._process(count, filenames, 'down', 'remove');
+  }
+
+  async _process (count, filenames, action, dbaction) {
+    const processed = [];
+    for (const filename of filenames) {
+      const file = this.fileStorage.loadFile(filename);
+      await file[action](this.connection);
+      await this.dataStorage[dbaction](this.connection, filename);
+      processed.push(filename);
+      if (--count == 0) break;
+    }
+    return processed;
   }
 }
-
-
-async function run () {
-  try {
-    const fileStorage = new FileStorage();
-    const dataStorage = new DataStorage();
-    const migrator = new Migrator({ fileStorage, dataStorage });
-    migrator.up();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-run();

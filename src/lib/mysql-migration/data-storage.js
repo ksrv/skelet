@@ -2,7 +2,8 @@ export default class DataStorage {
   async isExistsTable (connection) {
     const sql = 'SHOW TABLES';
     const results = await connection.query(sql);
-    return !!results.find(record => record.Tables_in_srvs == 'migrations');
+    const exists = !!results.find(record => record.Tables_in_srvs == 'migrations');
+    return exists;
   }
 
   async createTable (connection) {
@@ -22,9 +23,10 @@ export default class DataStorage {
   }
 
   async findAll (connection) {
-    const sql = 'SELECT name FROM migrations';
-    const results = await connection.query(sql);
-    return results;
+    const sql = 'SELECT name FROM migrations ORDER BY name';
+    const results = await connection.query({ sql });
+    const names = results.map(({ name }) => name);
+    return names;
   }
   
   async add (connection, name) {
@@ -36,7 +38,7 @@ export default class DataStorage {
   
   async remove (connection, name) {
     const sql = 'DELETE FROM migrations WHERE name = ?';
-    const values = [{ name }];
+    const values = [name];
     const results = await connection.query({ sql, values });
     return results;
   }
