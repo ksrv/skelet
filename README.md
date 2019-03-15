@@ -19,9 +19,18 @@
 ### Миграции
 
 ```
-npm run migrate create some migrate name - создается файл миграций
-npm run migrate up - накатываются все новые миграции
-npm run migrate up 1 - накатывается одна новая миграция
-npm run migrate down - откатывается одна миграция
-npm run migrate down 3 - откатываются три миграции
+npm run migrate <command> <server> [options]
+
+npm run migrate create <server> <long migration name>
+npm run migrate create MASTER some migrate name - создается файл миграций
+
+
+npm run migrate <server> up [count]
+npm run migrate MASTER up - накатываются все новые миграции
+npm run migrate MASTER up 1 - накатывается одна новая миграция
+
+
+npm run migrate <server> down [count]
+npm run migrate MASTER down - откатывается одна миграция
+npm run migrate MASTER down 3 - откатываются три миграции
 ```

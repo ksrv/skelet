@@ -5,15 +5,19 @@ import Migrator from '../lib/mysql-migration';
 
 
 commander
-  .command('create [name...]')
+  .command('create [server] [name...]')
   .description('Create new migration file')
-  .action(async (names) => {
+  .action(async (server, names) => {
+    if (typeof server === 'undefined') {
+      console.log(chalk.red('Migration server must be defined'));
+      return;
+    }
     if (names.length == 0) {
       console.log(chalk.red('Migration file name not defined'));
       return;
     }
     try {
-      const connection = await cluster.getConnection('MASTER');
+      const connection = await cluster.getConnection(server);
       const migrator = new Migrator(connection);
       const filename = migrator.create(names.join('-'));
       console.log(chalk.green(`Migration file created - "${ filename}"`));
@@ -27,9 +31,13 @@ commander
   });
 
 commander
-  .command('up [count]')
+  .command('up [server] [count]')
   .description('Migrate up [count]. Default up all new migration.')
-  .action(async (count) => {
+  .action(async (server, count) => {
+    if (typeof server === 'undefined') {
+      console.log(chalk.red('Migration server must be defined'));
+      return;
+    }
     try {
       const connection = await cluster.getConnection('MASTER');
       const migrator = new Migrator(connection);
@@ -49,9 +57,13 @@ commander
   });
 
 commander
-  .command('down [count]')
+  .command('down [server] [count]')
   .description('Migrate down [count]. Default down 1 migration.')
-  .action(async (count) => {
+  .action(async (server, count) => {
+    if (typeof server === 'undefined') {
+      console.log(chalk.red('Migration server must be defined'));
+      return;
+    }
     try {
       const connection = await cluster.getConnection('MASTER');
       const migrator = new Migrator(connection);
